@@ -10,9 +10,14 @@ import UIKit
 class WeatherListTableViewController: UITableViewController, AddWeatherDelegate {
 
     private let weatherListViewModel = WeatherListViewModel()
+    private var lastUnitSelection : Unit!
     override func viewDidLoad() {
         super.viewDidLoad()
         self.navigationController?.navigationBar.prefersLargeTitles = true
+        let userDefaults = UserDefaults.standard
+        if let value = userDefaults.value(forKey: "unit") as? String {
+            self.lastUnitSelection = Unit(rawValue: value)!
+        }
         
     }
     
@@ -40,7 +45,18 @@ class WeatherListTableViewController: UITableViewController, AddWeatherDelegate 
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-       prepareSegueForAddWeatherCityViewController(segue: segue)
+        if segue.identifier == "AddWeatherCityViewController"{
+           prepareSegueForAddWeatherCityViewController(segue: segue)
+        }else if segue.identifier == "SettingsTableViewController" {
+            prepareSegueForSettings(segue: segue)
+        }
+        
+    }
+    
+    private func prepareSegueForSettings(segue : UIStoryboardSegue) {
+        guard let destination = segue.destination as? UINavigationController else {return}
+        guard let destinationVC = destination.viewControllers.first as? SettingsTableViewController else {return}
+        destinationVC.delegate = self
     }
     
     private func prepareSegueForAddWeatherCityViewController(segue : UIStoryboardSegue) {
@@ -48,10 +64,13 @@ class WeatherListTableViewController: UITableViewController, AddWeatherDelegate 
             fatalError()
         }
         guard let destinationVC = destination.viewControllers.first as? AddCityViewController else {
-            fatalError()
-        }
+                fatalError()
+            }
+            
+            destinationVC.delegate = self
         
-        destinationVC.delegate = self
+        
+        
     }
     
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
@@ -61,4 +80,16 @@ class WeatherListTableViewController: UITableViewController, AddWeatherDelegate 
         }
     }
 
+}
+
+extension WeatherListTableViewController : SettingsDelegate {
+    
+    func doneClicked(vm: SettingsViewModel) {
+            weatherListViewModel.updateUnit(to: vm.selectedUnit)
+            print("asddadasds")
+            tableView.reloadData()
+            lastUnitSelection = Unit(rawValue: vm.selectedUnit.rawValue)!
+    }
+    
+    
 }
