@@ -8,11 +8,15 @@
 import Foundation
 
 final class UnitConverter {
+    
     var weatherViewModels : [WeatherViewModel]
     
     init(weatherViewModels: [WeatherViewModel]) {
         self.weatherViewModels = weatherViewModels
     }
+}
+
+extension UnitConverter {
     
     func toFahrenheit() {
         
